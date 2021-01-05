@@ -1,0 +1,47 @@
+name: Scheduler
+
+on:
+  schedule:
+    - cron:  '0 0 * * SAT'
+env:
+  TZ: "Asia/Tokyo"
+  REVUE_TOKEN: ${{ secrets.REVUE_TOKEN }}
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: [3.7]
+
+    steps:
+    - uses: actions/checkout@v2
+    - name: Set up Python ${{ matrix.python-version }}
+      uses: actions/setup-python@v2
+      with:
+        python-version: ${{ matrix.python-version }}
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        python -m pip install flake8 pytest
+        if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+    - name: Fetch a latest issue
+      run: |
+        python get_latest_issue.py --token $REVUE_TOKEN
+    - name: Update master
+      run: |
+        if git diff-index --quiet HEAD --; then
+          echo "git diff exit code $?. No changes"
+          echo ::set-output name=update::false
+        else
+          echo "git diff exit code $?. Update detected"
+          set -ex
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action"
+          git diff
+          git diff-index HEAD
+          git add --all
+          git commit -m "[GitHub Action] Update automatically"
+          echo ::set-output name=update::true
+        fi
