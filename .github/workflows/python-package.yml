@@ -2,7 +2,7 @@ name: Scheduler
 
 on:
   schedule:
-    - cron:  '0 0 * * SAT'
+    - cron:  '10 5 * * SAT'
 env:
   TZ: "Asia/Tokyo"
   REVUE_TOKEN: ${{ secrets.REVUE_TOKEN }}
