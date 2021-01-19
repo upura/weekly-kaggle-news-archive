@@ -36,4 +36,5 @@ jobs:
         git config --local user.name "GitHub Action"
         git add --all
         git commit -m "[GitHub Action] Update automatically"
+        git push origin master
         echo ::set-output name=update::true
